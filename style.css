@@ -53,9 +53,9 @@ button:hover {
 }
 
 #questionButtons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 #backButton {
@@ -122,11 +122,14 @@ button:hover {
   background-color: #ffdb99;
 }
 
+#aboutFooter {
+  margin-top: 40px;
+}
+
 details {
   border: 1px solid #ccc;
   border-radius: 6px;
   padding: 4px;
-  margin-top: 40px;
   background: #f9f9f9;
 }
 
@@ -139,7 +142,10 @@ details[open] {
   border-color: #b1a642;
 }
 
+details {
+  font-size: small;
+}
+
 details p {
   margin: 6px 0px;
-  font-size: small;
 }

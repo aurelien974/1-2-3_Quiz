@@ -1,11 +1,13 @@
 /* TODO:
-- remove played question from deck
-- back button before the end of the question goes back to the same 3 choices
-- add info for each quiz type to know how to play it
-- on the google sheet: modifier comment les emojis sont affichées car ça bug bien avec les fonctions =image(url), colonnes spéciales URL
+- on the google sheet: modifier comment les emojis sont affichées car ça bug bien avec les fonctions =image(url), colonnes spéciales URL, OU ALORS refaire la feuille de copie pour référencer les cellules par numéro de ligne/colonne à la place
 */
 
-async function loadData() {
+let quizQuestionsData = [];
+let quizRemainingQuestionsData = [];
+let questionsChoice = [];
+let quizTypesData = [];
+
+async function loadQuizQuestionsData() {
   let url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRzwAXTAsK7F2TVSjJeRDJkHbusoton0Cf_2jSjXCATNEsPAwcmNuJIEd_QDSf6hQMS4iUZB-E9EZVq/pub?gid=1373487969&single=true&output=csv";
 
   let res = await fetch(url);
@@ -16,8 +18,7 @@ async function loadData() {
     skipEmptyLines: true
   });
 
-  let data = parsed.data.map(r => ({
-
+  quizQuestionsData = parsed.data.map(r => ({
     Type: r.Type_de_quiz,
     Category: r.Catégorie,
     Part1: r.Partie_1,
@@ -25,16 +26,34 @@ async function loadData() {
     Part3: r.Partie_3,
     Answer: r.Réponse
   }));
+}
 
-  return data;
+async function loadQuizTypesData() {
+  let url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRzwAXTAsK7F2TVSjJeRDJkHbusoton0Cf_2jSjXCATNEsPAwcmNuJIEd_QDSf6hQMS4iUZB-E9EZVq/pub?gid=1271437459&single=true&output=csv";
+
+  let res = await fetch(url);
+  let text = await res.text();
+
+  let parsed = Papa.parse(text, {
+    header: true,
+    skipEmptyLines: true
+  });
+
+  quizTypesData = parsed.data.map(r => ({
+    Type: r.Quiz_Type,
+    Rule: r.Quiz_Type_Rule
+  }));
 }
 
 function shuffleArray(array) {
-  return array.sort(() => 0.5 - Math.random());
-  // return array;
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
 }
 
-function displayChoices(data) {
+function displayChoices() {
   const choiceDiv = document.getElementById("questionChoice");
   const questionDiv = document.getElementById("questionDisplay");
   const backButton = document.getElementById("backButton");
@@ -44,19 +63,22 @@ function displayChoices(data) {
   backButton.style.display = "none";
   nextButton.style.display = "none";
 
-  let sample = shuffleArray(data).slice(0, 3);
+  if (questionsChoice.length == 0) {
+    questionsChoice = shuffleArray(quizRemainingQuestionsData).slice(0, 3);
+    console.log("quizRemainingQuestionsData: ", quizRemainingQuestionsData);
+  }
 
   choiceDiv.innerHTML = "<h3>Choisis une question :</h3>";
-  sample.forEach(q => {
+  questionsChoice.forEach(q => {
     const btn = document.createElement("button");
     btn.className = "choice";
     btn.innerHTML = q.Type + "\n<i>" + q.Category + "</i>";
-    btn.onclick = () => displayQuestion(q, data);
+    btn.onclick = () => displayQuestion(q);
     choiceDiv.appendChild(btn);
   });
 }
 
-function displayQuestion(q, data) {
+function displayQuestion(q) {
   const choiceDiv = document.getElementById("questionChoice");
   const questionDiv = document.getElementById("questionDisplay");
   const backButton = document.getElementById("backButton");
@@ -67,7 +89,7 @@ function displayQuestion(q, data) {
   backButton.style.display = "block";
   nextButton.style.display = "block";
 
-  backButton.onclick = () => displayChoices(data);
+  backButton.onclick = () => displayChoices();
 
   // Question type and category
   const wrapperQuestionType = document.createElement("div");
@@ -84,6 +106,19 @@ function displayQuestion(q, data) {
     qCat.id = "questionCategory";
     qCat.textContent = q.Category;
     wrapperQuestionType.appendChild(qCat);
+  }
+
+  // Question type How To
+  const typeFound = quizTypesData.find(el => el.Type === q.Type);
+  if (typeFound !== undefined) {
+    const howToDetails = document.createElement("details");
+    howToDetails.id = "QuizTypeHowTo";
+    questionDiv.appendChild(howToDetails);
+    howToDetails.textContent = typeFound.Rule;
+
+    const howToSummary = document.createElement("summary");
+    howToSummary.textContent = "Comment jouer ?";
+    howToDetails.appendChild(howToSummary);
   }
 
   // Question parts
@@ -111,6 +146,14 @@ function displayQuestion(q, data) {
     if (currentStep < steps.length) {
       nextButton.textContent = steps[currentStep].labelNext;
     } else {
+      questionsChoice.length = 0;
+      const idx = quizRemainingQuestionsData.indexOf(q);
+      if (idx !== -1) {
+        quizRemainingQuestionsData.splice(idx, 1);
+      }
+      else {
+        console.log("Couldn't find question to delete: ", q);
+      }
       nextButton.style.display = "none";
     }
   };
@@ -143,7 +186,10 @@ function prepareStep(label, content, container) {
 }
 
 window.onload = async () => {
-  const data = await loadData();
-  console.log("data: ", data);
-  displayChoices(data);
+  await loadQuizQuestionsData();
+  await loadQuizTypesData();
+  quizRemainingQuestionsData = [...quizQuestionsData];
+  console.log("quizQuestionsData: ", quizQuestionsData);
+  console.log("quizTypesData: ", quizTypesData);
+  displayChoices();
 };
