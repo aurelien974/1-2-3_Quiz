@@ -1,6 +1,8 @@
 /* TODO:
-- responsive for mobile
 - remove played question from deck
+- back button before the end of the question goes back to the same 3 choices
+- add info for each quiz type to know how to play it
+- on the google sheet: modifier comment les emojis sont affichées car ça bug bien avec les fonctions =image(url), colonnes spéciales URL
 */
 
 async function loadData() {
@@ -62,8 +64,8 @@ function displayQuestion(q, data) {
 
   choiceDiv.innerHTML = "";
   questionDiv.innerHTML = "";
-  backButton.style.display = "none";
-  nextButton.style.display = "inline-block";
+  backButton.style.display = "block";
+  nextButton.style.display = "block";
 
   backButton.onclick = () => displayChoices(data);
 
@@ -74,14 +76,13 @@ function displayQuestion(q, data) {
 
   const qType = document.createElement("div");
   qType.id = "questionType";
-  qType.textContent =  q.Type;
+  qType.textContent = q.Type;
   wrapperQuestionType.appendChild(qType);
 
-  if(q.Category)
-  {
+  if (q.Category) {
     const qCat = document.createElement("div");
     qCat.id = "questionCategory";
-    qCat.textContent =  q.Category;
+    qCat.textContent = q.Category;
     wrapperQuestionType.appendChild(qCat);
   }
 
@@ -93,28 +94,33 @@ function displayQuestion(q, data) {
     { content: q.Answer, label: "R :", labelNext: "Voir Réponse" }
   ];
 
+  // Preload
+  steps.forEach((step) => {
+    const el = prepareStep(step.label, step.content, questionDiv);
+    step.Element = el;
+  });
+
+  // Show step by step
   let currentStep = 0;
 
   nextButton.textContent = steps[currentStep].labelNext;
 
   nextButton.onclick = () => {
-    showStep(steps[currentStep].label, steps[currentStep].content, questionDiv);
-
+    steps[currentStep].Element.classList.remove("hidden");
     currentStep++;
     if (currentStep < steps.length) {
       nextButton.textContent = steps[currentStep].labelNext;
     } else {
       nextButton.style.display = "none";
-      backButton.style.display = "inline-block";
     }
   };
 }
 
-function showStep(label, content, container) {
+function prepareStep(label, content, container) {
   const wrapper = document.createElement("div");
-  wrapper.className = "partRow";
+  wrapper.classList.add("partRow", "hidden");
 
-  const lbl = document.createElement("span");
+  const lbl = document.createElement("div");
   lbl.className = "partLabel";
   lbl.textContent = label;
 
@@ -133,6 +139,7 @@ function showStep(label, content, container) {
   wrapper.appendChild(lbl);
   wrapper.appendChild(body);
   container.appendChild(wrapper);
+  return wrapper;
 }
 
 window.onload = async () => {

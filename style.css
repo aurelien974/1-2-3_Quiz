@@ -6,6 +6,7 @@ body {
 
 #app {
   max-width: 400px;
+  width: 90%;
   margin: auto;
 }
 
@@ -51,6 +52,20 @@ button:hover {
   width: 200px;
 }
 
+#questionButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#backButton {
+  background-color: #696969;
+}
+
+#backButton:hover {
+  background-color: #3d3d3d;
+}
+
 #questionDisplay {
   display: flex;
   flex-direction: column;
@@ -67,6 +82,9 @@ button:hover {
   white-space: pre-line;
 }
 
+.partRow.hidden {
+  display: none;
+}
 
 .partLabel {
   font-weight: bold;
@@ -78,7 +96,9 @@ button:hover {
 }
 
 .partContent img {
-  max-height: 50px;
+  max-height: 60px;
+  max-width: 100%;
+  display: block;
 }
 
 #wrapperQuestionType {
