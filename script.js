@@ -1,5 +1,7 @@
 /* TODO:
-- on the google sheet: modifier comment les emojis sont affichées car ça bug bien avec les fonctions =image(url), colonnes spéciales URL, OU ALORS refaire la feuille de copie pour référencer les cellules par numéro de ligne/colonne à la place
+- idée : choisir le type de quiz ou la catégorie ?
+- idée : choisir une question parmi la liste complète ?
+- idée : fonction pour remélanger les cartes jouées ?
 */
 
 let quizQuestionsData = [];
