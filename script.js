@@ -125,9 +125,9 @@ function displayQuestion(q) {
 
   // Question parts
   const steps = [
-    { content: q.Part1, label: "1 :", labelNext: "Voir Partie 1" },
-    { content: q.Part2, label: "2 :", labelNext: "Voir Partie 2" },
-    { content: q.Part3, label: "3 :", labelNext: "Voir Partie 3" },
+    { content: q.Part1, label: "1 :", labelNext: "Voir Étape 1" },
+    { content: q.Part2, label: "2 :", labelNext: "Voir Étape 2" },
+    { content: q.Part3, label: "3 :", labelNext: "Voir Étape 3" },
     { content: q.Answer, label: "R :", labelNext: "Voir Réponse" }
   ];
 
